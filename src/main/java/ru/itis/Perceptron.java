@@ -1,69 +1,49 @@
 package ru.itis;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class Perceptron {
-    double[] x;
-    double y;
-    double[] w;
-    double[][] pat = {{0, 0, 0}, {0, 1, 1}, {1, 0, 1}, {1, 1, 1}};
+    List<Value> valueList;
+    double[] weights;
 
-    public Perceptron() {
-
-        x = new double[2];
-        w = new double[2];
-
-        for (int i = 0; i < x.length; i++) {
-            w[i] = 0;
-            System.out.println("Начальные значения весов");
-            System.out.println("w[" + i + "]=" + w[i]);
-        }
-
+    public Perceptron(List<Value> valueList) {
+        this.valueList = valueList;
+        weights = new double[]{0, 0, 1};
     }
 
-    public Perceptron(List<Value> valueList){
-
-    }
-
-    public void calculateY() {
-        y = 0;
-        for (int i = 0; i < x.length; i++) {
-            y += x[i] * w[i];
-        }
-        System.out.println("Взвешенная сумма входных значений");
-        System.out.println(y);
-        if (y >= 0) {
-            y = 1;
-        } else {
-            y = -1;
-        }
+    public double activationFunction(double x1, double x2) {
+        return thresholdActivationFunction(weights[0] * x1 + weights[1] * x2 + weights[2]*(-1));
     }
 
     public void study() {
-        double gEr = 0;
-        int m = 0;
+        double studySpeed = 0.00001;
+        double[] weightsOld;
+        int iterations = 0;
         do {
-            gEr = 0;
-            for (int p = 0; p < pat.length; p++) {
-                x = java.util.Arrays.copyOf(pat[p], pat[p].length - 1);
-                calculateY() ;
-                double er = pat[p][2];
-                gEr += Math.abs(er);
-                for (int i = 0; i < x.length; i++) {
-                    w[i] += 0.1 * er * x[i];
+            iterations++;
+            if (iterations % 1000 == 0) System.out.println(iterations + " " + Arrays.toString(weights));
+            weightsOld = Arrays.copyOf(weights, weights.length);
+            for (Value value : valueList) {
+                if (activationFunction(value.getIndex(), value.getClose()) * value.getClazz() < 0) {
+                    weights[0] += studySpeed * value.getIndex() * value.getClazz();
+                    weights[1] += studySpeed * value.getClose() * value.getClazz();
+                    weights[2] += studySpeed * (-1) * value.getClazz();
                 }
             }
-            m++;
-        } while (gEr != 0);
-        System.out.println("m=" + m);
+        } while (!Arrays.equals(weights, weightsOld));
     }
 
     public void test() {
         study();
-        for (int p = 0; p < pat.length; p++) {
-            x = java.util.Arrays.copyOf(pat[p], pat[p].length - 1);
-            calculateY();
-            System.out.println("y=" + y);
+        long st = 0;
+        for (Value value : valueList) {
+            if (activationFunction(value.getIndex(), value.getClose()) * value.getClazz() < 0) st++;
         }
+        System.out.println(st + " " + valueList.size());
+    }
+
+    private double thresholdActivationFunction(double sum) {
+        return sum <= 0 ? -1 : 1;
     }
 }

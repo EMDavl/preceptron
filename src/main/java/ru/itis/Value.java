@@ -3,11 +3,10 @@ package ru.itis;
 public class Value {
 
     private double close;
-    private String time;
     private int index;
     private int clazz;
 
-    public Value(double close, int index, String time) {
+    public Value(double close, int index) {
         this.close = close;
         this.index = index;
     }
@@ -26,14 +25,6 @@ public class Value {
 
     public int getClazz(){
         return clazz;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
     }
 
     @Override
