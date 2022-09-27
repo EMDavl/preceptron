@@ -5,24 +5,49 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Runner {
+
+
     public static void main(String[] args) throws IOException {
-        BufferedReader in = new BufferedReader(new FileReader("src/main/resources/gaz.csv"));
-        List<Value> valueList = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            for (int j = i; j < 5; j++) {
+                if (i == j) continue;
+                System.out.printf("First key: %d%nSecond key: %d\n", i, j);
+                List<KeyValuePair<Integer, Double[]>> valueList = prepareValues(i, j);
 
-        while (in.ready()) {
-            String[] s = in.readLine().split(";");
-            valueList.add(new Value(Double.parseDouble(s[1]), Integer.parseInt(s[0])));
+                SecondPerceptron perceptron = new SecondPerceptron(valueList);
+                perceptron.test();
+            }
         }
-        double a = calcA(valueList);
 
-        setClasses(valueList, a, calcB(valueList, a));
+    }
 
-        valueList.forEach(System.out::println);
+    private static List<KeyValuePair<Integer, Double[]>> prepareValues(int key1, int key2) throws IOException {
+        BufferedReader in = new BufferedReader(new FileReader("src/main/resources/vk_perc1.csv"));
+        List<KeyValuePair<Integer, Double[]>> valueList = new ArrayList<>();
+        in.readLine();
+        String k;
 
-        Perceptron perceptron = new Perceptron(valueList);
-        perceptron.test();
+        while (!isEmpty(k = in.readLine())) {
+            String[] s = k.split(";");
+            if (s.length != 6) continue;
+            Double[] entries = new Double[4];
+            for (int i = 0; i < s.length - 2; i++) {
+                try {
+                    entries[i] = Double.parseDouble(s[i+1]);
+                } catch (NumberFormatException e){
+                    entries[i] = 0d;
+                }
+            }
+            int key = Integer.valueOf(s[0]);
 
+            if (key == key1){
+                valueList.add(new KeyValuePair<>(1, entries));
+            } else if (key == key2){
+                valueList.add(new KeyValuePair<>(-1, entries));
+            }
+        }
         in.close();
+        return valueList;
     }
 
     public static double calcA(List<Value> valueList){
@@ -63,5 +88,8 @@ public class Runner {
             }
 
             return mult/n;
+    }
+    public static boolean isEmpty(String str){
+        return str == null || str.isEmpty();
     }
 }
