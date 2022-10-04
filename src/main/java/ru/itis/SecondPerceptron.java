@@ -34,6 +34,7 @@ public class SecondPerceptron {
         long iterations = 0;
         while ((positive/values.size()) < 0.75 && iterations < 10_000){
             iterations++;
+            if(iterations % 1000 == 0) System.out.println(iterations);
             positive = 0;
             for (KeyValuePair<Integer, Double[]> entry : values) {
                 if (activationFunction(entry.getValue()) * entry.getKey() < 0) {
